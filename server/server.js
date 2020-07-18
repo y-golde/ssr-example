@@ -1,6 +1,7 @@
 import express from "express";
 import fs from "fs";
 import path from "path";
+import bodyParser from "body-parser";
 
 const PORT = 8000;
 
@@ -22,6 +23,11 @@ let db = new sqlite3.Database(dbName, (err) => {
   }
 });
 
+app.use( bodyParser.json() );       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+  extended: true
+}));
+
 app.get("/", (req, res, next) => {
   fs.readFile(path.resolve("./build/index.html"), "utf-8", (err, data) => {
     if (err) {
@@ -37,12 +43,23 @@ app.get("/", (req, res, next) => {
   });
 });
 
+//API
 app.get("/api/hello", (req, res, next) => {
   getJokes(res);
 });
 
+app.post("/api/like/:jokeId" , (req , res , next) => {
+  likeJoke(req.params.jokeId , res);
+});
+
+app.post("/api/unlike/:jokeId" , (req , res , next) => {
+  unlikeJoke(req.params.jokeId , res);
+});
+
+//use static
 app.use(express.static(path.resolve(__dirname, "..", "build")));
 
+//listen on port
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
 });
@@ -69,8 +86,30 @@ function insertJoke(title, body) {
 
 //insertJoke('what time is it 2?' , 'now its 12 oclock');
 
+function likeJoke(jokeId , res) {
+  db.run("UPDATE Jokes SET likes = likes + 1 WHERE uid = (?)" , [jokeId] , (err , rows) => {
+    if(err) {
+      console.log(err);
+      return res.send(err);
+    }
+    console.log(rows);
+    return res.send(rows);
+  });
+}
+
+function unlikeJoke(jokeId , res) {
+  db.run("UPDATE Jokes SET likes = likes - 1 WHERE uid = (?)" , [jokeId] , (err , rows) => {
+    if(err) {
+      console.log(err);
+      return res.send(err);
+    }
+    console.log(rows);
+    return res.send(rows);
+  });
+}
+
 function getJokes(res) {
-  db.all("SELECT * FROM Jokes ORDER BY likes", [], (err, rows) => {
+  db.all("SELECT * FROM Jokes ORDER BY likes DESC", [], (err, rows) => {
     if (err) {
       console.log(err);
     }
