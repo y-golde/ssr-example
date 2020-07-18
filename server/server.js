@@ -57,25 +57,23 @@ function createTable() {
 
 function insertJoke(title, body) {
   db.run(
-    "INSERT INTO Jokes (title , body , likes) VALUES ( ? , ? , ? )",
-    [title, body, 1],
+    "INSERT INTO Jokes (title , body , likes , createdDate) VALUES ( ? , ? , ? , ?)",
+    [title, body, 1 , Date.now()],
     (err) => {
       if (err) {
         console.log(err);
       }
     }
   );
-
-  db.close();
 }
 
-function getJokes(res) {
-    db.all("SELECT * FROM Jokes ORDER BY likes", [], (err, rows) => {
-      if (err) {
-        console.log(err);
-      }
-      return res.send(rows);
+//insertJoke('what time is it 2?' , 'now its 12 oclock');
 
-      db.close();
-    });
+function getJokes(res) {
+  db.all("SELECT * FROM Jokes ORDER BY likes", [], (err, rows) => {
+    if (err) {
+      console.log(err);
+    }
+    return res.send(rows);
+  });
 }

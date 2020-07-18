@@ -11,8 +11,9 @@ class JokesRow extends React.Component {
     $.ajax({
       url : "/api/hello",
       success : (data) => {
+        console.log(data);
         this.setState({
-          jokes : data.jokes,
+          jokes : data,
         })
       }
     });
