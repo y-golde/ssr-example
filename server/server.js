@@ -11,7 +11,7 @@ import App from '../src/App';
 
 const app = express();
 
-app.use('^/$' , (req , res , next) => {
+app.get('/' , (req , res , next) => {
   fs.readFile(path.resolve('./build/index.html') , 'utf-8' , (err , data) => {
     if(err){
       console.log(err);
@@ -24,6 +24,25 @@ app.use('^/$' , (req , res , next) => {
         '<div id="root"></div>' ,
         `<div id="root">${ReactDOMServer.renderToString(<App />)}</div>` ));
   });
+});
+
+app.get('/api/hello' , (req , res , next) => {
+  return res.send(
+    {
+      jokes: [
+        {
+          id: 1,
+          title: "exam1",
+          body: "testtesttesttest",
+        },
+        {
+          id: 2,
+          title: "exam2",
+          body: "test2test2test2test2",
+        },
+      ],
+    }
+  )
 });
 
 app.use(express.static(path.resolve(__dirname , '..' , 'build')));
